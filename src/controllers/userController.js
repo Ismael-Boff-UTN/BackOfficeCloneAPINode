@@ -10,20 +10,21 @@ const authUser = asyncHandler(async (req, res) => {
     const { loginName, password } = req.body;
 
 
-    const user = await User.findOne({ loginName });
+    const user = await User.findOne({ loginName }).populate("userForms");
 
     if (user && (await user.matchPassword(password))) {
         generateToken(res, user._id);
         res.json({
             _id: user._id,
             firstName: user.firstName,
-            lastName : user.lastName,
-            profilePicture : user.profilePicture,
-            language : user.language,
-            userForms : user.userForms,
-            email : user.email,
-            brand : user.brand,
-            loginName : user.loginName,
+            lastName: user.lastName,
+            profilePicture: user.profilePicture,
+            language: user.language,
+            userForms: user.userForms,
+            email: user.email,
+            brand: user.brand,
+            loginName: user.loginName,
+            roles : user.roles,
 
         })
     } else {
@@ -40,7 +41,7 @@ const authUser = asyncHandler(async (req, res) => {
 //@access Public
 const registerUser = asyncHandler(async (req, res) => {
 
-    const { loginName, firstName, lastName, email, password, profilePicture } = req.body;
+    const { loginName, firstName, lastName, email, password, profilePicture, roles, userForms } = req.body;
     const userExist = await User.findOne({ loginName });
 
     if (userExist) {
@@ -55,14 +56,15 @@ const registerUser = asyncHandler(async (req, res) => {
         lastName,
         email,
         profilePicture,
-        password
+        password,
+        roles, 
+        userForms
     });
 
     if (user) {
         generateToken(res, user._id);
         res.status(201).json({
-            _id: user._id,
-            name: user.loginName
+            user
         })
     } else {
         res.status(400);
@@ -71,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 
-    res.status(200).json({ message: "Register User" });
+    //res.status(200).json({ message: "Register User" });
 
 });
 
@@ -135,7 +137,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             language: updatedUser.language,
             email: updatedUser.email,
             profilePicture: updatedUser.profilePicture,
-            loginName : updatedUser.loginName,
+            loginName: updatedUser.loginName,
         })
 
     } else {
@@ -147,10 +149,119 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 
 
-    res.status(200).json({ message: "Update Profile User" });
+    //res.status(200).json({ message: "Update Profile User" });
 
 });
 
+
+//@description Obtener Todos Los Usuarios
+//route GET /api/users/list
+//@access Private
+const getAllUsers = asyncHandler(async (req, res) => {
+
+    try {
+        //Si No Se Pasa Un Limite (null) Retorna TODOS Los Usuarios
+        //Ej. http://localhost:4000/api/users/list?limite=5&desde=4
+        const { limite = null, desde = 0 } = req.query;
+        //Retorna todos los usuarios en la base de datos, tanto activos como no activos
+        const users = await User.find().populate("userForms")
+            .skip(Number(desde))
+            .limit(Number(limite));
+        res.status(200).json({
+            users,
+            quantity: users.length
+
+        });
+    } catch (error) {
+
+        res.status(400);
+        throw new Error("Falla al obtener usuarios");
+    }
+
+});
+
+//@description Eliminar Usuario
+//route DELETE /api/users/:id
+//@access Private
+const deleteUser = asyncHandler(async (req, res) => {
+
+    try {
+        const { id } = req.params;
+
+        const usuarioEncontrado = await User.findById(id);
+
+        if (usuarioEncontrado.isActive === true) {
+            const usuario = await User.findByIdAndUpdate(id, {
+                isActive: false,
+            });
+
+            res.status(200).json({
+                message: `Usuario : ${usuario.loginName}, Desctivado!`,
+            });
+        } else {
+            const usuario = await User.findByIdAndUpdate(id, {
+                isActive: true,
+            });
+
+            res.status(200).json({
+                message: `Usuario : ${usuario.loginName}, Reestrablecido!`,
+            });
+        }
+    } catch (error) {
+
+        res.status(400);
+        throw new Error("Falla Al Eliminar Usuario");
+    }
+
+});
+
+
+//@description Actualizar Perfil de un Usuario por Id
+//route PUT /api/users/update/:id
+//@access Private
+const updateUserById = asyncHandler(async (req, res) => {
+
+
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    
+
+    if (user) {
+        user.firstName = req.body.firstName || user.firstName;
+        user.lastName = req.body.lastName || user.lastName;
+        user.email = req.body.email || user.email;
+        user.language = req.body.language || user.language;
+        user.profilePicture = req.body.profilePicture || user.profilePicture;
+        user.loginName = req.body.loginName || user.loginName;
+        user.userForms = req.body.userForms || user.userForms;
+        user.roles = req.body.roles || user.roles;
+
+        if (req.body.password) {
+            user.password = req.body.password;
+        }
+
+        console.log(user.userForms);
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            language: updatedUser.language,
+            email: updatedUser.email,
+            profilePicture: updatedUser.profilePicture,
+            loginName: updatedUser.loginName,
+            userForms : updatedUser.userForms,
+            roles : updatedUser.roles,
+        })
+
+    } else {
+        res.status(404);
+        throw new Error("Falla Al Actualizar Usuario");
+    }
+
+});
 
 
 export {
@@ -158,5 +269,8 @@ export {
     registerUser,
     logoutUser,
     getUserProfile,
-    updateUserProfile
+    updateUserProfile,
+    getAllUsers,
+    deleteUser,
+    updateUserById
 };

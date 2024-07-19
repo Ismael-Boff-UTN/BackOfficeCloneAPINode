@@ -27,14 +27,14 @@ const userSchema = mongoose.Schema({
     },
     profilePicture: {
         type: String,
-        required: true,
+        required: false,
         default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjdLBPtVBiGPQ4LrKanWvkPFbQTTcnvGoOEg&s"
     },
 
     userForms: {
-        type: Array,
-        required: false,
-        default: [],
+        type: mongoose.Schema.Types.Array,
+        ref: "Forms",
+        default: []
     },
     language: {
         type: String,
@@ -47,15 +47,14 @@ const userSchema = mongoose.Schema({
         default: true
     },
     roles: {
-        type: String,
+        type: mongoose.Schema.Types.Array,
         required: false,
-        default: "ROLE_ADMIN",
-        enum: ["ROLE_ADMIN", "ROLE_USER", "ROLE_MANAGER"],
+        default: ["ROLE_ADMIN"],
     },
-    brand :{
-        type : mongoose.Schema.Types.Mixed,
-        required : true,
-        default : ""
+    brand: {
+        type: mongoose.Schema.Types.Mixed,
+        required: true,
+        default: ""
     }
 
 
