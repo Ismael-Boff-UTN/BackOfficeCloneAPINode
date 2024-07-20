@@ -24,7 +24,7 @@ const authUser = asyncHandler(async (req, res) => {
             email: user.email,
             brand: user.brand,
             loginName: user.loginName,
-            roles : user.roles,
+            roles: user.roles,
 
         })
     } else {
@@ -57,7 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         profilePicture,
         password,
-        roles, 
+        roles,
         userForms
     });
 
@@ -186,7 +186,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
 
     try {
-        const { id } = req.params;
+        const id = req.body._id;
 
         const usuarioEncontrado = await User.findById(id);
 
@@ -196,7 +196,7 @@ const deleteUser = asyncHandler(async (req, res) => {
             });
 
             res.status(200).json({
-                message: `Usuario : ${usuario.loginName}, Desctivado!`,
+                message: `Usuario : ${usuario.loginName}, Desactivado!`,
             });
         } else {
             const usuario = await User.findByIdAndUpdate(id, {
@@ -225,7 +225,7 @@ const updateUserById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const user = await User.findById(id);
 
-    
+
 
     if (user) {
         user.firstName = req.body.firstName || user.firstName;
@@ -252,8 +252,8 @@ const updateUserById = asyncHandler(async (req, res) => {
             email: updatedUser.email,
             profilePicture: updatedUser.profilePicture,
             loginName: updatedUser.loginName,
-            userForms : updatedUser.userForms,
-            roles : updatedUser.roles,
+            userForms: updatedUser.userForms,
+            roles: updatedUser.roles,
         })
 
     } else {
