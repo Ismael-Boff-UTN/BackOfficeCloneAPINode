@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";//Para No Usar TryCatches
 import Form from "../models/formModel.js";
+import { populate } from "dotenv";
 
 
 
@@ -9,10 +10,10 @@ import Form from "../models/formModel.js";
 const createForm = asyncHandler(async (req, res) => {
 
 
-    const { name, description, properties, formFields } = req.body;
+    const { name, description, properties, formFields, brandLogo } = req.body;
 
     const form = await Form.create({
-        name, description, properties, formFields
+        name, description, properties, formFields, brandLogo
     });
 
     if (form) {
@@ -76,9 +77,9 @@ const updateForm = asyncHandler(async (req, res) => {
         const { id } = req.params;
 
 
-        const { name, description, properties, formFields } = req.body;
+        const { name, description, properties, formFields, brandLogo } = req.body;
 
-        const newData = { name, description, properties, formFields }
+        const newData = { name, description, properties, formFields, brandLogo }
         await Form.findByIdAndUpdate(id, newData);
 
         res.status(200).json({
@@ -119,4 +120,30 @@ const getAllForms = asyncHandler(async (req, res) => {
 });
 
 
-export { createForm, deleteForm, updateForm, getAllForms };
+//@description Obtener un formulario por su ID
+//route DELETE /api/forms/:id
+//@access Private
+const getFormById = asyncHandler(async (req, res) => {
+
+    try {
+        const { id } = req.body._id || req.params;
+
+
+        const formularioEncontrado = await Form.findById(id).populate({ path: "formTasks", populate: { path: "assignedUser", select: ['firstName', 'lastName', "name -_id"] } });
+
+
+
+        res.status(200).json({
+            formularioEncontrado
+        });
+
+    } catch (error) {
+
+        res.status(400);
+        throw new Error("Falla Al Encontrar Formulario");
+    }
+
+});
+
+
+export { createForm, deleteForm, updateForm, getAllForms, getFormById };

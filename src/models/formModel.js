@@ -21,11 +21,22 @@ const formSchema = mongoose.Schema({
         required: true,
         deafault: [],
     },
+    formTasks: {
+        type: mongoose.Schema.Types.Array,
+        required: false,
+        deafault: [],
+        ref : "Tasks"
+    },
     isActive: {
         type: Boolean,
         required: true,
         default: true
     },
+    brandLogo :{
+        type : String,
+        required : false,
+        default : "https://freesvg.org/img/logo-generic.png"
+    }
 }, {
     timestamps: true
 });

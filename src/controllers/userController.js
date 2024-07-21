@@ -115,7 +115,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 const updateUserProfile = asyncHandler(async (req, res) => {
 
     const user = await User.findById(req.user._id);
-    console.log(user);
+
     if (user) {
         user.firstName = req.body.firstName || user.firstName;
         user.lastName = req.body.lastName || user.lastName;
@@ -186,7 +186,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
 
     try {
-        const id = req.body._id;
+        const id = req.body.id || req.params.id;
 
         const usuarioEncontrado = await User.findById(id);
 

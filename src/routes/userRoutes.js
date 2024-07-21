@@ -26,7 +26,7 @@ router.put("/profile", protect, updateUserProfile);
 
 router.get("/list", protect, getAllUsers);
 
-router.delete("/delete", protect, deleteUser);
+router.delete("/delete/:id", protect, deleteUser);
 
 router.put("/update/:id", protect, updateUserById);
 

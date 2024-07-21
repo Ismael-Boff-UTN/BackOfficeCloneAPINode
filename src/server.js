@@ -4,6 +4,7 @@ dotenv.config();
 const port = process.env.PORT || 4000;
 import userRoutes from "./routes/userRoutes.js";
 import formRoutes from "./routes/formRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 import { notFound, errorhandler } from "./middleware/errorMiddleware.js";
 import connectDB from "./config/db.js";
 import cookieParser from 'cookie-parser';
@@ -20,6 +21,7 @@ app.use(cookieParser());
 
 app.use("/api/users", userRoutes);
 app.use("/api/forms", formRoutes);
+app.use("/api/tasks", taskRoutes);
 
 
 app.get("/", (req,res)=> res.send("Server ON"));
